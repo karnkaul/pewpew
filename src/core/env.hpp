@@ -2,6 +2,7 @@
 #include <memory>
 #include <span>
 #include <string>
+#include <vector>
 
 namespace pew {
 inline constexpr bool debug_v =
@@ -29,4 +30,5 @@ struct TArray {
 };
 
 std::string dataPath(Env const& env, std::string_view uri);
+std::vector<std::string> fileList(Env const& env, std::string_view dir, std::string_view ext);
 } // namespace pew

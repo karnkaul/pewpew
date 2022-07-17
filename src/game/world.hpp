@@ -104,7 +104,7 @@ class World {
 	}
 
 	template <typename C>
-	void doTick(C& out, vf::Time const dt);
+	void doTick(C& out, DeltaTime const dt);
 
 	void setup(GameObject& out);
 

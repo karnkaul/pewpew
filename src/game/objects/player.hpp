@@ -22,6 +22,6 @@ class Player final : public Pawn {
 
   private:
 	void setup() override;
-	void tick(vf::Time dt) override;
+	void tick(DeltaTime dt) override;
 };
 } // namespace pew

@@ -34,9 +34,9 @@ void Player::setup() {
 	layer = layers::playerLayer;
 }
 
-void Player::tick(vf::Time dt) {
+void Player::tick(DeltaTime dt) {
 	auto const state = controller.state();
-	auto const pos = quad.instance.transform.position + state.xy * speed * dt.count();
+	auto const pos = quad.instance.transform.position + state.xy * speed * dt.scaled.count();
 	auto const ha = m_world->area() * 0.5f * (1.0f - nPad);
 	quad.instance.transform.position = clamp(pos, -ha, ha);
 

@@ -17,12 +17,12 @@ class StatusEffect : public GameObject {
   private:
 	void setup() override {}
 
-	void tick(vf::Time dt) override final {
-		if ((m_elapsed += dt) >= ttl) {
-			unapply(dt);
+	void tick(DeltaTime dt) override final {
+		if ((m_elapsed += dt.real) >= ttl) {
+			unapply(dt.real);
 			destroy();
 		} else {
-			apply(dt);
+			apply(dt.real);
 		}
 	}
 

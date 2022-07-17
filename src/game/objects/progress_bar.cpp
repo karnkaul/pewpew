@@ -24,7 +24,7 @@ ProgressBar& ProgressBar::setSize(glm::vec2 size) {
 	return *this;
 }
 
-void ProgressBar::tick(vf::Time) {
+void ProgressBar::tick(DeltaTime) {
 	m_bar.instance.transform.position = m_border.instance.transform.position = m_bg.instance.transform.position = position;
 	m_bar.instance.transform.position.x += m_barOffsetX;
 	m_bar.instance.transform.scale.x = std::clamp(nValue, 0.0f, 1.0f);

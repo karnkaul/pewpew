@@ -1,4 +1,5 @@
 #pragma once
+#include <core/delta_time.hpp>
 #include <core/ptr.hpp>
 #include <vulkify/context/frame.hpp>
 
@@ -16,7 +17,7 @@ class GameObject {
 
   protected:
 	virtual void setup() = 0;
-	virtual void tick(vf::Time dt) = 0;
+	virtual void tick(DeltaTime dt) = 0;
 	virtual void draw(vf::Frame const& frame) const = 0;
 
 	Ptr<World> m_world{};

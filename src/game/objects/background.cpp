@@ -31,10 +31,10 @@ bool Background::set(vf::Texture const& texture) {
 
 void Background::setup() { layer = layers::backgroundLayer; }
 
-void Background::tick(vf::Time dt) {
+void Background::tick(DeltaTime dt) {
 	if (m_tiles.empty()) { return; }
 
-	for (auto& mesh : m_tiles) { mesh.instance.transform.position.x -= m_speed * dt.count(); }
+	for (auto& mesh : m_tiles) { mesh.instance.transform.position.x -= m_speed * dt.scaled.count(); }
 
 	auto const oob = -(m_world->area().x + m_size.x) * 0.5f;
 	auto& front = m_tiles.front();
@@ -43,7 +43,7 @@ void Background::tick(vf::Time dt) {
 		std::rotate(m_tiles.begin(), m_tiles.begin() + 1, m_tiles.end());
 	}
 
-	m_speed = std::clamp(m_speed + dt.count() * 10.0f, 0.0f, speed);
+	m_speed = std::clamp(m_speed + dt.scaled.count() * 10.0f, 0.0f, speed);
 }
 
 void Background::draw(vf::Frame const& frame) const {

@@ -1,11 +1,11 @@
+#include <core/collection.hpp>
 #include <core/log.hpp>
 #include <engine/context.hpp>
 #include <game/objects/background.hpp>
+#include <game/objects/progress_bar.hpp>
 #include <game/world.hpp>
 #include <ktl/fixed_vector.hpp>
 #include <random>
-
-#include <game/objects/progress_bar.hpp>
 
 using namespace std::chrono_literals;
 
@@ -28,6 +28,14 @@ std::optional<pew::Context> makeContext(int argc, char const* const argv[]) {
 [[maybe_unused]] float randomRange(float min, float max) {
 	static auto eng = std::default_random_engine(std::random_device{}());
 	return std::uniform_real_distribution<float>(min, max)(eng);
+}
+
+template <typename T>
+[[maybe_unused]] void loadAllFrom(pew::World& world, pew::Collection<T>& out, std::string_view dir, std::string_view ext) {
+	for (auto& file : pew::fileList(world.context().env, dir, ext)) {
+		T t;
+		if (world.load(t, file)) { out.push(std::move(t)); }
+	}
 }
 
 struct DebugControls : pew::KeyListener {

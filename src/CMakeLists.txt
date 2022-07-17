@@ -1,7 +1,10 @@
 target_sources(${PROJECT_NAME} PRIVATE
   core/basis.hpp
+  core/collection.hpp
+  core/delta_time.hpp
   core/env.cpp
   core/env.hpp
+  core/framerate.hpp
   core/log.cpp
   core/log.hpp
 

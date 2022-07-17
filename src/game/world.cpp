@@ -64,15 +64,15 @@ void World::onKey(vf::KeyEvent const& key) {
 }
 
 void World::tick(vf::Time dt) {
+	auto const dlt = DeltaTime{dt, dt * timeScale};
 	if (m_uiView) {
-		m_uiView->tick(dt);
+		m_uiView->tick(dlt);
 		if (m_uiView->m_destroyed) { m_uiView.reset(); }
 		return;
 	}
-	doTick(m_statusEffects, dt);
-	dt = dt * timeScale;
-	doTick(m_gameObjects, dt);
-	doTick(m_damagers, dt);
+	doTick(m_statusEffects, dlt);
+	doTick(m_gameObjects, dlt);
+	doTick(m_damagers, dlt);
 }
 
 void World::render(vf::Frame const& frame) const {
@@ -133,7 +133,7 @@ bool World::load(capo::Sound& out, std::string_view uri) {
 }
 
 template <typename C>
-void World::doTick(C& out, vf::Time const dt) {
+void World::doTick(C& out, DeltaTime const dt) {
 	for (auto& obj : out) { static_cast<GameObject*>(obj.get())->tick(dt); }
 	std::erase_if(out, [](auto const& obj) { return obj->m_destroyed; });
 }

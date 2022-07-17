@@ -30,13 +30,13 @@ bool Weapon::fire(glm::vec2 const position, glm::vec2 const velocity, vf::Time t
 	return false;
 }
 
-void Weapon::tick(vf::Time dt) {
+void Weapon::tick(DeltaTime dt) {
 	for (auto& projectile : m_projectiles.entries) {
-		projectile.t.elapsed += dt;
-		projectile.instance.transform.position += projectile.t.velocity.current * dt.count();
-		projectile.t.ttl -= dt;
+		projectile.t.elapsed += dt.scaled;
+		projectile.instance.transform.position += projectile.t.velocity.current * dt.scaled.count();
+		projectile.t.ttl -= dt.scaled;
 		if (projectile.t.ttl <= 0s) { projectile.t.destroyed = true; }
-		projectile.t.velocity.current = accelerate(projectile.t.velocity.current, projectile.t.velocity.target, 20.0f, dt);
+		projectile.t.velocity.current = accelerate(projectile.t.velocity.current, projectile.t.velocity.target, 20.0f, dt.scaled);
 
 		for (auto& damager : m_world->damagers()) {
 			if (damager->intersecting(projectile.instance.transform.position)) {
@@ -46,7 +46,7 @@ void Weapon::tick(vf::Time dt) {
 		}
 	}
 	std::erase_if(m_projectiles.entries, [](auto const& e) { return e.t.destroyed; });
-	if (m_fireWait > 0s) { m_fireWait -= dt; }
+	if (m_fireWait > 0s) { m_fireWait -= dt.scaled; }
 }
 
 void Weapon::draw(vf::Frame const& frame) const { m_projectiles.draw(frame); }

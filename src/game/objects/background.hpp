@@ -13,7 +13,7 @@ class Background final : public GameObject {
 
   private:
 	void setup() override;
-	void tick(vf::Time dt) override;
+	void tick(DeltaTime dt) override;
 	void draw(vf::Frame const& frame) const override;
 
 	vf::Texture m_texture{};

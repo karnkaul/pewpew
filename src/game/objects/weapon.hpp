@@ -27,7 +27,7 @@ class Weapon : public GameObject {
 	vf::Time m_fireWait{};
 
 	void setup() override;
-	void tick(vf::Time dt) override;
+	void tick(DeltaTime dt) override;
 	void draw(vf::Frame const& frame) const override;
 };
 } // namespace pew

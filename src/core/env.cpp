@@ -27,3 +27,11 @@ Env Env::make(int argc, char const* const* argv) {
 } // namespace pew
 
 std::string pew::dataPath(Env const& env, std::string_view uri) { return (stdfs::path(env.paths.data) / uri).generic_string(); }
+
+std::vector<std::string> pew::fileList(Env const& env, std::string_view dir, std::string_view ext) {
+	auto ret = std::vector<std::string>{};
+	for (auto const& it : stdfs::directory_iterator(dataPath(env, dir))) {
+		if (it.is_regular_file() && it.path().extension() == ext) { ret.push_back(it.path().generic_string()); }
+	}
+	return ret;
+}

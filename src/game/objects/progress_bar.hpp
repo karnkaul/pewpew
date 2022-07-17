@@ -17,7 +17,7 @@ class ProgressBar : public GameObject {
 
   protected:
 	void setup() override;
-	void tick(vf::Time) override;
+	void tick(DeltaTime) override;
 	void draw(vf::Frame const& frame) const override;
 
 	vf::Mesh m_bar{};

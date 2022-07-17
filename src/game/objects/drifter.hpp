@@ -9,7 +9,7 @@ class Drifter : public Pawn {
 	glm::vec2 speed{-100.0f, 0.0f};
 
 	void setup() override;
-	void tick(vf::Time dt) override;
+	void tick(DeltaTime dt) override;
 
   private:
 	virtual void onHit(Player&) = 0;

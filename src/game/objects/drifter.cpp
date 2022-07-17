@@ -17,8 +17,8 @@ void Drifter::setup() {
 	quad.instance.transform.position.x = extent.x * 0.5f;
 }
 
-void Drifter::tick(vf::Time dt) {
-	quad.instance.transform.position += speed * dt.count();
+void Drifter::tick(DeltaTime dt) {
+	quad.instance.transform.position += speed * dt.scaled.count();
 	if (intersecting(m_world->player()->rect())) { onHit(*m_world->player()); }
 	if (oob(m_world->area(), quad.instance.transform.position, size())) { destroy(); }
 }
