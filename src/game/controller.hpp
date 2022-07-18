@@ -1,7 +1,6 @@
 #pragma once
 #include <core/ptr.hpp>
 #include <glm/vec2.hpp>
-#include <ktl/either.hpp>
 #include <ktl/enum_flags/enum_flags.hpp>
 
 namespace pew {
@@ -10,7 +9,7 @@ using GamepadId = int;
 
 class Controller {
   public:
-	using Type = ktl::either<Ptr<Keyboard const>, GamepadId>;
+	enum class Type { eKeyboard, eGamepad };
 
 	enum class Flag { eFire };
 	using Flags = ktl::enum_flags<Flag, std::uint8_t>;
@@ -20,12 +19,15 @@ class Controller {
 		Flags flags{};
 	};
 
-	Controller(Type type = {}) : m_type(type) {}
+	Controller(Ptr<Keyboard const> keyboard = {}) : m_keyboard(keyboard) {}
 
 	Type type() const { return m_type; }
-	State state() const;
+	GamepadId gamepadId() const { return m_gamepadId; }
+	State update();
 
   private:
 	Type m_type{};
+	Ptr<Keyboard const> m_keyboard{};
+	GamepadId m_gamepadId{};
 };
 } // namespace pew

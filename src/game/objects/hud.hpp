@@ -19,6 +19,7 @@ class Hud final : public GameObject {
 	vf::Text m_score{};
 	vf::Text m_fps{};
 	Framerate m_framerate{};
+	vf::Time m_elapsed{};
 	Ptr<ProgressBar> m_hp{};
 };
 } // namespace pew

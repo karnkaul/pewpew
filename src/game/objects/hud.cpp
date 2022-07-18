@@ -3,8 +3,21 @@
 #include <game/objects/hud.hpp>
 #include <game/world.hpp>
 #include <ktl/kformat.hpp>
+#include <sstream>
 
 namespace pew {
+namespace {
+std::string formatElapsed(vf::Time elapsed) {
+	auto const h = std::chrono::duration_cast<std::chrono::hours>(elapsed);
+	auto const m = std::chrono::duration_cast<std::chrono::minutes>(elapsed) - h;
+	auto const s = std::chrono::duration_cast<std::chrono::seconds>(elapsed) - h - m;
+	auto str = std::stringstream{};
+	str << h.count();
+	str << std::setfill('0') << ':' << std::setw(2) << m.count() << ':' << std::setw(2) << s.count();
+	return str.str();
+}
+} // namespace
+
 void Hud::setup() {
 	m_border = vf::Mesh(m_world->vfContext(), "background_border");
 	m_score = vf::Text(m_world->vfContext(), "score");
@@ -50,7 +63,8 @@ void Hud::tick(DeltaTime dt) {
 	m_score.setString(std::to_string(m_world->player()->score));
 
 	m_framerate.tick(dt.real);
-	m_fps.setString(ktl::kformat("{} FPS", m_framerate.fps()));
+	m_elapsed += dt.real;
+	m_fps.setString(ktl::kformat("{} FPS / {}", m_framerate.fps(), formatElapsed(m_elapsed)));
 }
 
 void Hud::draw(vf::Frame const& frame) const {

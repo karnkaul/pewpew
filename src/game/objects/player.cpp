@@ -29,13 +29,13 @@ void Player::setup() {
 	auto const x = m_world->area().x * (1.0f - nPad.x);
 	quad.instance.transform.position.x = -x;
 
-	controller = Controller(&m_world->keyboard());
+	controller = &m_world->keyboard();
 	weapon = m_world->spawn<Weapon>();
 	layer = layers::playerLayer;
 }
 
 void Player::tick(DeltaTime dt) {
-	auto const state = controller.state();
+	auto const state = controller.update();
 	auto const pos = quad.instance.transform.position + state.xy * speed * dt.scaled.count();
 	auto const ha = m_world->area() * 0.5f * (1.0f - nPad);
 	quad.instance.transform.position = clamp(pos, -ha, ha);
