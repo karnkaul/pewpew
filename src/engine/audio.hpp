@@ -5,7 +5,7 @@ namespace pew {
 class Audio {
   public:
 	Audio() = default;
-	Audio(capo::Instance& instance) { m_sfx = instance.makeSource(); }
+	Audio(capo::Instance& instance) { m_sfx = instance.make_source(); }
 
 	Audio& setSfxGain(float value) {
 		m_sfx.gain(value);

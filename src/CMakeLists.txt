@@ -12,6 +12,8 @@ target_sources(${PROJECT_NAME} PRIVATE
   engine/instanced.hpp
   engine/keyboard.hpp
 
+  game/autopilot.cpp
+  game/autopilot.hpp
   game/controller.cpp
   game/controller.hpp
   game/game_object.hpp

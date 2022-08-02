@@ -39,7 +39,7 @@ void Weapon::tick(DeltaTime dt) {
 		projectile.t.velocity.current = accelerate(projectile.t.velocity.current, projectile.t.velocity.target, 20.0f, dt.scaled);
 
 		for (auto& damager : m_world->damagers()) {
-			if (damager->intersecting(projectile.instance.transform.position)) {
+			if (damager->rect().contains(projectile.instance.transform.position)) {
 				m_world->player()->destroy(*damager);
 				projectile.t.destroyed = true;
 			}

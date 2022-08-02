@@ -13,7 +13,7 @@ constexpr bool nonEmpty(Controller::State const& state) { return state.xy.x != 0
 bool setState(vf::Gamepad::Id const id, Controller::State& out) {
 	if (auto gamepad = vf::Gamepad{id}) {
 		out.xy.x = debounce(gamepad(vf::GamepadAxis::eLeftX));
-		out.xy.y = debounce(-gamepad(vf::GamepadAxis::eLeftY));
+		out.xy.y = debounce(gamepad(vf::GamepadAxis::eLeftY));
 		if (gamepad(vf::GamepadButton::eA)) { out.flags.set(Controller::Flag::eFire); }
 		return nonEmpty(out);
 	}
@@ -39,7 +39,7 @@ Controller::State Controller::update() {
 	auto const map = vf::Gamepad::map();
 	for (auto id = vf::Gamepad::Id{}; id < vf::Gamepad::max_id_v; ++id) {
 		if (map.map[id] && setState(id, ret)) {
-			if (m_gamepadId != id) { plog::info("Controller changed: Gamepad{}", m_gamepadId); }
+			if (m_gamepadId != id) { plog::info("Controller changed: Gamepad_{}", m_gamepadId); }
 			m_gamepadId = id;
 			m_type = Type::eGamepad;
 			return ret;

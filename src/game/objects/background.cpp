@@ -21,7 +21,7 @@ bool Background::set(vf::Texture const& texture) {
 	for (std::size_t i = 0; i < count; ++i) {
 		m_tiles.push_back(vf::Mesh(m_world->vfContext(), "background_" + std::to_string(i)));
 		auto& mesh = m_tiles.back();
-		mesh.gbo.write(vf::Geometry::makeQuad({m_size}));
+		mesh.gbo.write(vf::Geometry::make_quad({m_size}));
 		mesh.instance.transform.position.x = x;
 		x += m_size.x;
 		mesh.texture = texture.handle();

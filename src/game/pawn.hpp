@@ -10,10 +10,9 @@ class Pawn : public GameObject {
 	glm::vec2 size() const { return m_size; }
 	Pawn& setSize(glm::vec2 size);
 
-	vf::Rect rect() const { return {{m_size, quad.instance.transform.position}}; }
+	vf::Rect rect() const { return {{m_size * quad.instance.transform.scale, quad.instance.transform.position}}; }
 
-	bool intersecting(glm::vec2 point) const;
-	bool intersecting(vf::Rect rect) const;
+	bool intersecting(Pawn const& other) const { return other.rect().intersects(rect()); }
 
   protected:
 	void setup() override;

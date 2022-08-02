@@ -13,11 +13,11 @@ void ProgressBar::setup() {
 ProgressBar& ProgressBar::setSize(glm::vec2 size) {
 	auto qci = vf::QuadCreateInfo{};
 	qci.size = size + glm::vec2(10.0f, 10.0f) * m_world->basis().scale;
-	m_border.gbo.write(vf::Geometry::makeQuad(qci));
+	m_border.gbo.write(vf::Geometry::make_quad(qci));
 	qci.size = size;
-	m_bg.gbo.write(vf::Geometry::makeQuad(qci));
+	m_bg.gbo.write(vf::Geometry::make_quad(qci));
 	qci.origin.x = qci.size.x * 0.5f;
-	m_bar.gbo.write(vf::Geometry::makeQuad(qci));
+	m_bar.gbo.write(vf::Geometry::make_quad(qci));
 	m_barOffsetX = -qci.origin.x;
 	m_size = size;
 	tick({});

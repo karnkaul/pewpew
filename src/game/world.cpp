@@ -123,12 +123,12 @@ bool World::load(vf::Ttf& out, std::string_view uri) {
 
 bool World::load(capo::Sound& out, std::string_view uri) {
 	auto path = dataPath(m_context.env, uri);
-	auto pcm = capo::PCM::fromFile(dataPath(m_context.env, uri));
+	auto pcm = capo::PCM::from_file(dataPath(m_context.env, uri).c_str());
 	if (!pcm) {
 		plog::warn("Failed to load PCM [{}]", uri);
 		return false;
 	}
-	out = m_context.capoInstance->makeSound(*pcm);
+	out = m_context.capoInstance->make_sound(*pcm);
 	return true;
 }
 

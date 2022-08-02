@@ -1,6 +1,7 @@
 #include <core/collection.hpp>
 #include <core/log.hpp>
 #include <engine/context.hpp>
+#include <game/autopilot.hpp>
 #include <game/objects/background.hpp>
 #include <game/objects/progress_bar.hpp>
 #include <game/world.hpp>
@@ -19,8 +20,8 @@ std::optional<pew::Context> makeContext(int argc, char const* const argv[]) {
 		return {};
 	}
 	auto ret = pew::Context{pew::Env::make(argc, argv), {}, std::move(*vf)};
-	ret.capoInstance = ktl::make_unique<capo::Instance>();
-	ret.basis.scale = ret.basisScale(ret.vfContext.framebufferExtent());
+	ret.capoInstance = capo::Instance::make();
+	ret.basis.scale = ret.basisScale(ret.vfContext.framebuffer_extent());
 	ret.audio = *ret.capoInstance;
 	return ret;
 }
@@ -56,10 +57,10 @@ struct DebugControls : pew::KeyListener {
 			consumable->quad.instance.transform.position.y = randomRange(-zone.y, zone.y);
 		}
 		if (key(vf::Key::eW, vf::Action::eRelease, vf::Mod::eCtrl)) { m_world->context().vfContext.close(); }
-		if (key(vf::Key::eP, vf::Action::eRelease, vf::Mod::eCtrl)) {
-			auto const vsync = m_world->context().vfContext.vsync() == vf::VSync::eOff ? vf::VSync::eOn : vf::VSync::eOff;
-			m_world->context().vfContext.setVSync(vsync);
-		}
+		// if (key(vf::Key::eP, vf::Action::eRelease, vf::Mod::eCtrl)) {
+		// 	auto const vsync = m_world->context().vfContext.vsync() == vf::VSync::eOff ? vf::VSync::eOn : vf::VSync::eOff;
+		// 	m_world->context().vfContext.setVSync(vsync);
+		// }
 	}
 };
 
@@ -76,7 +77,7 @@ void run(pew::Context context) {
 
 	world.player()->quad.texture = world.resources.textures.ship.handle();
 	world.player()->setSize(context.basis.scale * pew::layout::playerQuad);
-	world.player()->weapon->mesh().gbo.write(vf::Geometry::makeQuad({context.basis.scale * pew::layout::projectileQuad}));
+	world.player()->weapon->mesh().gbo.write(vf::Geometry::make_quad({context.basis.scale * pew::layout::projectileQuad}));
 
 	world.background()->open("textures/background.png");
 
@@ -84,10 +85,13 @@ void run(pew::Context context) {
 
 	if constexpr (pew::debug_v) { world.attach(&debug); }
 
+	auto autopilot = pew::Autopilot{};
+
 	context.vfContext.show();
 	while (!context.vfContext.closing()) {
 		auto frame = context.vfContext.frame();
 		world.handle(frame.poll());
+		autopilot.tick(world, frame.dt() * world.timeScale);
 		world.tick(frame.dt());
 		world.render(frame);
 	}
