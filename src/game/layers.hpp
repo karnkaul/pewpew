@@ -1,8 +1,9 @@
 #pragma once
 
 namespace pew::layers {
-inline constexpr auto backgroundLayer = -10;
-inline constexpr auto damagerLayer = 10;
-inline constexpr auto playerLayer = damagerLayer;
-inline constexpr auto hudLayer = 20;
+inline constexpr auto background = -10;
+inline constexpr auto damager = 10;
+inline constexpr auto player = damager;
+inline constexpr auto projectile = damager + 5;
+inline constexpr auto hud = 20;
 } // namespace pew::layers

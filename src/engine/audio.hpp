@@ -7,16 +7,15 @@ class Audio {
 	Audio() = default;
 	Audio(capo::Instance& instance) { m_sfx = instance.make_source(); }
 
-	Audio& setSfxGain(float value) {
+	Audio& set_sfx_gain(float value) {
 		m_sfx.gain(value);
 		return *this;
 	}
 
-	float sfxGain() const { return m_sfx.gain(); }
+	float sfx_gain() const { return m_sfx.gain(); }
 
 	Audio& play(capo::Sound const& sound) {
-		m_sfx.bind(sound);
-		m_sfx.play();
+		m_sfx.play(sound);
 		return *this;
 	}
 

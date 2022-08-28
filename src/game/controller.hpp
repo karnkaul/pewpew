@@ -1,10 +1,9 @@
 #pragma once
-#include <core/ptr.hpp>
 #include <glm/vec2.hpp>
 #include <ktl/enum_flags/enum_flags.hpp>
+#include <util/ptr.hpp>
 
 namespace pew {
-class Keyboard;
 using GamepadId = int;
 
 class Controller {
@@ -19,15 +18,12 @@ class Controller {
 		Flags flags{};
 	};
 
-	Controller(Ptr<Keyboard const> keyboard = {}) : m_keyboard(keyboard) {}
-
 	Type type() const { return m_type; }
-	GamepadId gamepadId() const { return m_gamepadId; }
+	GamepadId gamepadId() const { return m_gamepad; }
 	State update();
 
   private:
 	Type m_type{};
-	Ptr<Keyboard const> m_keyboard{};
-	GamepadId m_gamepadId{};
+	GamepadId m_gamepad{};
 };
 } // namespace pew

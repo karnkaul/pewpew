@@ -58,10 +58,10 @@ target_source_group(TARGET ${PROJECT_NAME})
 target_compile_definitions(${PROJECT_NAME} PRIVATE $<$<CONFIG:Debug>:PEW_DEBUG>)
 target_include_directories(${PROJECT_NAME} PRIVATE src "${CMAKE_CURRENT_BINARY_DIR}")
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
-target_link_libraries(${PROJECT_NAME} PRIVATE capo::capo vulkify::vulkify)
+target_link_libraries(${PROJECT_NAME} PRIVATE capo::capo vulkify::vulkify tardigrade::tardigrade)
 
 if(CMAKE_CXX_COMPILER_ID MATCHES Clang OR CMAKE_CXX_COMPILER_ID MATCHES GNU)
-  target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Wpedantic -Werror=return-type)
+  target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Werror=return-type)
 endif()
 
 if(PLATFORM STREQUAL "Win64" AND NOT WIN64_GCC)
