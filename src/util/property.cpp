@@ -14,7 +14,7 @@ Property Property::Parser::next() {
 	if (line.empty()) { return next(); }
 	if (line.front() == '#') { return next(); }
 	auto const eq = line.find('=');
-	if (eq == std::string::npos) { return next(); }
+	if (eq == std::string::npos) { return {trim(line)}; }
 	return {trim(std::string_view(line.data(), eq)), trim(std::string_view(line.data() + eq + 1, line.size() - eq - 1))};
 }
 } // namespace pew::util

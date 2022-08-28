@@ -16,6 +16,15 @@ class Ttf;
 namespace pew {
 struct Context;
 
+struct SheetInfo {
+	std::string texture_uri{};
+	glm::ivec2 tile_count{};
+	vf::Filtering filtering{vf::Filtering::eLinear};
+
+	explicit operator bool() const { return !texture_uri.empty(); }
+};
+
+// TODO: remove / refactor
 struct SheetAnimation {
 	using Sequence = IndexTimeline::Sequence;
 
@@ -32,8 +41,11 @@ struct LoadInfo {
 template <>
 struct LoadInfo<vf::Texture> {
 	std::string uri{};
-	vf::TextureCreateInfo info{};
+	vf::TextureCreateInfo info{vf::TextureCreateInfo{.filtering = vf::Filtering::eLinear}};
 };
+
+template <typename T>
+using LoadList = std::vector<LoadInfo<T>>;
 
 class Loader {
   public:
@@ -46,6 +58,9 @@ class Loader {
 	template <typename T>
 	T do_load(LoadInfo<T> const& info) const = delete;
 };
+
+template <>
+SheetInfo Loader::do_load<SheetInfo>(LoadInfo<SheetInfo> const& info) const;
 
 template <>
 vf::Texture Loader::do_load<vf::Texture>(LoadInfo<vf::Texture> const& info) const;

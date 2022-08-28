@@ -7,6 +7,10 @@
 #include <tardigrade/services.hpp>
 
 namespace pew {
+namespace {
+auto const ship_sprite_sheet = Signature{"sheets/player.txt"};
+}
+
 void Player::take_damage(int damage) {
 	if (damage > 0) { hp = std::clamp(hp - damage, 0, hp); }
 }
@@ -27,7 +31,7 @@ void Player::setup() {
 	if (m_weapon = entity()->find<Weapon>(); !m_weapon) { m_weapon = entity()->attach<Weapon>(); }
 
 	ship = entity()->attach<SpriteRenderer<>>();
-	ship->get().set_sheet(tg::locate<Resources*>()->find<vf::Sprite::Sheet>(world->manifest.sprite_sheets.ship));
+	ship->get().set_sheet(tg::locate<Resources*>()->find<vf::Sprite::Sheet>(ship_sprite_sheet));
 }
 
 void Player::translate(glm::vec2 n_xy) { m_dxy += n_xy; }

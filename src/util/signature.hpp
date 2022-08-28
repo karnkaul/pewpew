@@ -1,6 +1,6 @@
 #pragma once
 #include <cstdint>
-#include <string_view>
+#include <string>
 
 namespace pew {
 class Signature {
@@ -9,7 +9,9 @@ class Signature {
 
 	constexpr Signature(std::size_t value = {}) : m_value(value) {}
 	Signature(std::string_view str);
-	Signature(char const* str) : Signature(std::string_view{str}) {}
+
+	template <std::convertible_to<std::string_view> T>
+	Signature(T&& t) : Signature(std::string_view{t}) {}
 
 	Signature(bool) = delete;
 

@@ -3,7 +3,6 @@
 #include <engine/resources.hpp>
 #include <game/attachments/weapon.hpp>
 #include <game/layers.hpp>
-#include <game/manifest.hpp>
 #include <game/world.hpp>
 #include <tardigrade/services.hpp>
 
@@ -17,16 +16,17 @@ constexpr glm::vec2 accelerate(glm::vec2 current, glm::vec2 const target, float 
 	if (dy) { current.y += (dv * dt.count() * 1000.0f); }
 	return current;
 }
+
+auto const fire_sfx = Signature{"sfx/weapon_fire.wav"};
 } // namespace
 
 bool Weapon::fire(glm::vec2 const position, glm::vec2 const velocity, vf::Time ttl) {
 	if (m_fire_wait <= 0s) {
-		auto* world = static_cast<World*>(scene());
 		auto projectile = Projectile{};
 		projectile.velocity.target = velocity;
 		projectile.ttl = ttl;
 		m_projectiles.add(position, projectile);
-		if (auto sound = tg::locate<Resources*>()->find<capo::Sound>(world->manifest.sfx.fire)) { tg::locate<Audio*>()->play(*sound); }
+		if (auto sound = tg::locate<Resources*>()->find<capo::Sound>(fire_sfx)) { tg::locate<Audio*>()->play(*sound); }
 		m_fire_wait = fire_delay;
 		return true;
 	}

@@ -3,11 +3,14 @@
 #include <engine/resources.hpp>
 #include <game/attachments/background.hpp>
 #include <game/layers.hpp>
-#include <game/manifest.hpp>
 #include <game/world.hpp>
 #include <tardigrade/services.hpp>
 
 namespace pew {
+namespace {
+auto const background_image = Signature{"textures/background.png"};
+}
+
 bool Background::set(vf::Texture const& texture) {
 	if (!texture) { return false; }
 	auto const extent = glm::vec2(texture.extent());
@@ -32,9 +35,8 @@ bool Background::set(vf::Texture const& texture) {
 
 void Background::setup() {
 	tg::RenderAttachment::setup();
-	auto* world = static_cast<World*>(scene());
 	layer = layers::background;
-	if (auto texture = tg::locate<Resources*>()->find<vf::Texture>(world->manifest.textures.background)) { set(*texture); }
+	if (auto texture = tg::locate<Resources*>()->find<vf::Texture>(background_image)) { set(*texture); }
 }
 
 void Background::tick(tg::DeltaTime dt) {

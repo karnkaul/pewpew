@@ -1,14 +1,16 @@
 target_sources(${PROJECT_NAME} PRIVATE
   engine/animated_sprite.cpp
   engine/animated_sprite.hpp
-  engine/async_loader.cpp
-  engine/async_loader.hpp
   engine/context.hpp
   engine/framerate.hpp
   engine/frame.hpp
   engine/instanced.hpp
   engine/loader.cpp
   engine/loader.hpp
+  engine/manifest_loader.cpp
+  engine/manifest_loader.hpp
+  engine/manifest.cpp
+  engine/manifest.hpp
   engine/resources.cpp
   engine/resources.hpp
 
@@ -16,9 +18,6 @@ target_sources(${PROJECT_NAME} PRIVATE
   game/controller.hpp
   game/layers.hpp
   game/layout.hpp
-  game/manifest_data.cpp
-  game/manifest_data.hpp
-  game/manifest.hpp
   game/world.cpp
   game/world.hpp
 

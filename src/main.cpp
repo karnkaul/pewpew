@@ -1,13 +1,11 @@
-#include <engine/async_loader.hpp>
 #include <engine/context.hpp>
 #include <engine/frame.hpp>
+#include <engine/manifest_loader.hpp>
 #include <engine/resources.hpp>
 #include <game/attachments/background.hpp>
 #include <game/attachments/player.hpp>
 #include <game/attachments/progress_bar.hpp>
 #include <game/attachments/weapon.hpp>
-#include <game/manifest.hpp>
-#include <game/manifest_data.hpp>
 #include <game/world.hpp>
 #include <glm/gtx/norm.hpp>
 #include <tardigrade/tardigrade.hpp>
@@ -264,46 +262,15 @@ std::optional<Context> make_context(char const* arg0) {
 	return ret;
 }
 
-AsyncLoader load_resources(Manifest<Signature>& out, Resources& out_resources) {
-	auto uris = Manifest<std::string>{};
-	auto data = ManifestData{};
-	if (auto count = ManifestData::load(data, "manifest.txt"); count > 0) {
-		logger::info("[Manifest] Loaded [{}] entries", count);
-		out = data.signs;
-		uris = std::move(data.uris);
-	}
-
-	auto ret = AsyncLoader{};
-
-	auto textures = ResourceList<vf::Texture>{};
-	textures.push_back({std::move(uris.textures.ship)});
-	textures.push_back({std::move(uris.textures.background), vf::TextureCreateInfo{.filtering = vf::Filtering::eLinear}});
-	auto ttfs = ResourceList<vf::Ttf>{};
-	ttfs.push_back({std::move(uris.fonts.main)});
-	auto sounds = ResourceList<capo::Sound>{};
-	sounds.push_back({std::move(uris.sfx.fire)});
-	ret.enqueue(textures);
-	ret.enqueue(ttfs);
-	ret.enqueue(sounds);
-	auto custom = [&out, &out_resources] {
-		if (auto texture = out_resources.find<vf::Texture>(out.textures.ship)) {
-			auto sprite_sheet = vf::Sprite::Sheet{};
-			sprite_sheet.set_texture(texture->handle());
-			out_resources.add(out.sprite_sheets.ship, std::move(sprite_sheet));
-		}
-	};
-	ret.enqueue(custom);
-	auto const count = ret.load(1);
-	logger::debug("Loading {} resources", count);
-
-	return ret;
-}
-
 class InitLoader : public tg::TickAttachment {
 	void setup() override {
-		auto& manifest = *tg::locate<Manifest<Signature>*>();
-		auto& resources = *tg::locate<Resources*>();
-		m_loader = load_resources(manifest, resources);
+		auto manifest = Manifest{};
+		if (auto count = Manifest::load(manifest, "manifest.txt"); count > 0) { logger::info("[Manifest] Loaded [{}] entries", count); }
+
+		m_loader.enqueue(std::move(manifest));
+
+		auto const count = m_loader.load(1);
+		logger::debug("Loading {} resources", count);
 
 		m_progress = entity()->attach<ProgressBar>();
 	}
@@ -315,13 +282,10 @@ class InitLoader : public tg::TickAttachment {
 			return;
 		}
 		auto const current = m_loader.progress();
-		if (!vf::FloatEq{}(m_progress->progress, current)) {
-			logger::debug("Progress: {}", current);
-			m_progress->progress = current;
-		}
+		if (!vf::FloatEq{}(m_progress->progress, current)) { m_progress->progress = current; }
 	}
 
-	AsyncLoader m_loader{};
+	ManifestLoader m_loader{};
 	Ptr<ProgressBar> m_progress{};
 };
 
@@ -331,7 +295,6 @@ void run(Context context) {
 	tg::Services::provide(&context.vf_context.device());
 	auto audio = tg::ServiceProvider<Audio>{*context.capo_instance};
 	auto resources = tg::ServiceProvider<Resources>{};
-	auto manifest = tg::ServiceProvider<Manifest<Signature>>{};
 
 	audio.set_sfx_gain(0.2f);
 	auto director = tg::Director::Service{};

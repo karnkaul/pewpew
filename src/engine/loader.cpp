@@ -9,23 +9,17 @@
 
 namespace pew {
 namespace {
-struct SheetInfo {
-	std::string image_uri{};
-	glm::ivec2 tile_count{};
-	vf::Filtering filtering{vf::Filtering::eNearest};
-};
-
 constexpr vf::Filtering to_filtering(std::string_view str) {
-	if (str == "linear") { return vf::Filtering::eLinear; }
-	return vf::Filtering::eNearest;
+	if (str == "nearest") { return vf::Filtering::eNearest; }
+	return vf::Filtering::eLinear;
 }
 
 SheetInfo get_sheet_info(std::istream& in, Ptr<SheetAnimation::Sequence> sequence = {}) {
 	auto parser = util::Property::Parser{in};
 	auto ret = SheetInfo{};
 	parser.parse_all([&](util::Property property) {
-		if (property.key == "image") {
-			ret.image_uri = std::move(property.value);
+		if (property.key == "texture") {
+			ret.texture_uri = std::move(property.value);
 		} else if (property.key == "x") {
 			ret.tile_count.x = std::atoi(property.value.c_str());
 		} else if (property.key == "y") {
@@ -46,8 +40,8 @@ SheetInfo get_sheet_info(std::istream& in, Ptr<SheetAnimation::Sequence> sequenc
 }
 
 bool validate(SheetInfo const& info, std::string_view const uri) {
-	if (info.image_uri.empty()) {
-		logger::warn("[Resources] Required field missing/empty in Sprite::Sheet [{}]: [image]", uri);
+	if (info.texture_uri.empty()) {
+		logger::warn("[Resources] Required field missing/empty in Sprite::Sheet [{}]: [texture]", uri);
 		return false;
 	}
 	if (info.tile_count.x <= 0 || info.tile_count.y <= 0) {
@@ -89,11 +83,26 @@ struct Stopwatch {
 } // namespace
 
 template <>
+SheetInfo Loader::do_load<SheetInfo>(LoadInfo<SheetInfo> const& info) const {
+	auto sw = Stopwatch{};
+	auto buffer = ktl::byte_array{};
+	if (!io::load(buffer, info.uri.c_str())) {
+		logger::warn("[Resources] Failed to read sheet animation: [{}]", info.uri);
+		return {};
+	}
+	auto str = std::stringstream{std::string{reinterpret_cast<char const*>(buffer.data()), buffer.size()}};
+	auto const ret = get_sheet_info(str);
+	if (!validate(ret, info.uri)) { return {}; }
+	logger::debug("[Resources] SheetInfo loaded: [{}] in {:.1f}ms", info.uri, sw.dt().count() * 1000.0f);
+	return ret;
+}
+
+template <>
 vf::Texture Loader::do_load<vf::Texture>(LoadInfo<vf::Texture> const& info) const {
 	auto sw = Stopwatch{};
 	auto image = vf::Image{};
-	auto m_buffer = ktl::byte_array{};
-	if (!load_image(m_buffer, image, info.uri.c_str())) {
+	auto buffer = ktl::byte_array{};
+	if (!load_image(buffer, image, info.uri.c_str())) {
 		logger::warn("[Resources] Failed to open Image: [{}]", info.uri);
 		return {};
 	}
@@ -109,13 +118,13 @@ vf::Texture Loader::do_load<vf::Texture>(LoadInfo<vf::Texture> const& info) cons
 template <>
 vf::Ttf Loader::do_load<vf::Ttf>(LoadInfo<vf::Ttf> const& info) const {
 	auto sw = Stopwatch{};
-	auto m_buffer = ktl::byte_array{};
-	if (!io::load(m_buffer, info.uri.c_str())) {
+	auto buffer = ktl::byte_array{};
+	if (!io::load(buffer, info.uri.c_str())) {
 		logger::warn("[Resources] Failed to open font: [{}]", info.uri);
 		return {};
 	}
 	auto ret = vf::Ttf{context.vf_context.device()};
-	if (!ret.load(m_buffer)) {
+	if (!ret.load(buffer)) {
 		logger::warn("[Resources] Failed to create Ttf: [{}]", info.uri);
 		return {};
 	}
@@ -126,12 +135,12 @@ vf::Ttf Loader::do_load<vf::Ttf>(LoadInfo<vf::Ttf> const& info) const {
 template <>
 capo::Sound Loader::do_load<capo::Sound>(LoadInfo<capo::Sound> const& info) const {
 	auto sw = Stopwatch{};
-	auto m_buffer = ktl::byte_array{};
-	if (!io::load(m_buffer, info.uri.c_str())) {
+	auto buffer = ktl::byte_array{};
+	if (!io::load(buffer, info.uri.c_str())) {
 		logger::warn("[Resources] Failed to read PCM: [{}]", info.uri);
 		return {};
 	}
-	auto pcm = capo::PCM::from_memory(m_buffer, capo::FileFormat::eUnknown);
+	auto pcm = capo::PCM::from_memory(buffer, capo::FileFormat::eUnknown);
 	if (!pcm) {
 		logger::warn("[Resources] Failed to load PCM: [{}]", info.uri);
 		return {};
@@ -144,19 +153,19 @@ capo::Sound Loader::do_load<capo::Sound>(LoadInfo<capo::Sound> const& info) cons
 template <>
 SheetAnimation Loader::do_load<SheetAnimation>(LoadInfo<SheetAnimation> const& info) const {
 	auto sw = Stopwatch{};
-	auto m_buffer = ktl::byte_array{};
-	if (!io::load(m_buffer, info.uri.c_str())) {
+	auto buffer = ktl::byte_array{};
+	if (!io::load(buffer, info.uri.c_str())) {
 		logger::warn("[Resources] Failed to read sheet animation: [{}]", info.uri);
 		return {};
 	}
-	auto str = std::stringstream{std::string{reinterpret_cast<char const*>(m_buffer.data()), m_buffer.size()}};
+	auto str = std::stringstream{std::string{reinterpret_cast<char const*>(buffer.data()), buffer.size()}};
 	auto ret = SheetAnimation{};
 	auto const sheet_info = get_sheet_info(str, &ret.sequence);
 	if (!validate(sheet_info, info.uri)) { return {}; }
 	if (!validate(ret.sequence, info.uri)) { return {}; }
 
 	auto image = vf::Image{};
-	if (!load_image(m_buffer, image, sheet_info.image_uri.c_str())) { return {}; }
+	if (!load_image(buffer, image, sheet_info.texture_uri.c_str())) { return {}; }
 	auto const tci = vf::TextureCreateInfo{.filtering = sheet_info.filtering};
 	ret.texture = vf::Texture{context.vf_context.device(), image, tci};
 	auto const tile_count = glm::uvec2{sheet_info.tile_count};

@@ -9,7 +9,6 @@
 
 namespace pew {
 void World::setup() {
-	manifest = *tg::locate<Manifest<Signature>*>();
 	auto* background = spawn<Background>();
 	m_background = background->id();
 

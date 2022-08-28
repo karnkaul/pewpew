@@ -4,7 +4,6 @@
 #include <game/attachments/player.hpp>
 #include <game/attachments/progress_bar.hpp>
 #include <game/layers.hpp>
-#include <game/manifest.hpp>
 #include <game/world.hpp>
 #include <ktl/kformat.hpp>
 #include <tardigrade/services.hpp>
@@ -24,6 +23,8 @@ std::string format_elapsed(vf::Time elapsed) {
 	str << std::setfill('0') << ':' << std::setw(2) << m.count() << ':' << std::setw(2) << s.count();
 	return str.str();
 }
+
+auto const main_font = Signature{"fonts/main.otf"};
 } // namespace
 
 void Hud::setup() {
@@ -46,7 +47,7 @@ void Hud::setup() {
 	geometry.add_quad(qci);
 	m_border.buffer.write(std::move(geometry));
 
-	auto* ttf = resources->find<vf::Ttf>(world->manifest.fonts.main);
+	auto* ttf = resources->find<vf::Ttf>(main_font);
 	if (ttf) { m_score.set_ttf(ttf->handle()); }
 	auto const height = vf::Text::Height{40};
 	m_score.set_height(height);

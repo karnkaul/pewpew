@@ -1,5 +1,5 @@
 #pragma once
-#include <engine/loader.hpp>
+#include <engine/manifest.hpp>
 #include <engine/resources.hpp>
 #include <ktl/async/kfunction.hpp>
 #include <ktl/kunique_ptr.hpp>
@@ -7,22 +7,19 @@
 #include <mutex>
 
 namespace pew {
-template <typename T>
-using ResourceList = std::vector<LoadInfo<T>>;
-
-class AsyncLoader {
+class ManifestLoader {
   public:
-	AsyncLoader();
-	AsyncLoader(AsyncLoader&&) noexcept;
-	AsyncLoader& operator=(AsyncLoader&&) noexcept;
-	~AsyncLoader() noexcept;
+	ManifestLoader();
+	ManifestLoader(ManifestLoader&&) noexcept;
+	ManifestLoader& operator=(ManifestLoader&&) noexcept;
+	~ManifestLoader() noexcept;
 
 	bool can_enqueue() const;
 
 	template <typename T>
-	void enqueue(ResourceList<T> const& list) {
+	void enqueue(LoadList<T> list) {
 		if (!can_enqueue()) { return; }
-		for (auto const& info : list) {
+		for (auto& info : list) {
 			if (info.uri.empty()) { continue; }
 			auto const func = [r = m_resources, c = m_context, m = m_mutex.get(), info = info] {
 				auto t = Loader{*c}.load(info);
@@ -34,6 +31,7 @@ class AsyncLoader {
 	}
 
 	void enqueue(ktl::kfunction<void()> custom);
+	void enqueue(Manifest manifest);
 
 	std::size_t load(std::uint32_t threads = 2);
 

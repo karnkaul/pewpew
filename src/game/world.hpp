@@ -1,6 +1,5 @@
 #pragma once
 #include <game/layout.hpp>
-#include <game/manifest.hpp>
 #include <ktl/kunique_ptr.hpp>
 #include <tardigrade/scene.hpp>
 #include <util/ptr.hpp>
@@ -23,8 +22,6 @@ class World : public tg::Scene {
 	Ptr<Player> player() const;
 
 	glm::vec2 area() const;
-
-	Manifest<Signature> manifest{};
 
   private:
 	void setup() override;
