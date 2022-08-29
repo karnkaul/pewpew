@@ -1,76 +1,74 @@
 #pragma once
-#include <ktl/kunique_ptr.hpp>
-#include <tardigrade/detail/type_id.hpp>
-#include <util/ptr.hpp>
-#include <util/signature.hpp>
+#include <engine/resource_map.hpp>
+#include <util/index_timeline.hpp>
+#include <vulkify/graphics/primitives/sprite.hpp>
+
+namespace capo {
+class Sound;
+}
+
+namespace vf {
+class Ttf;
+} // namespace vf
 
 namespace pew {
+struct Context;
+
+struct SheetAnimation {
+	using Sequence = IndexTimeline::Sequence;
+
+	vf::Sprite::Sheet sheet{};
+	Sequence sequence{};
+};
+
 class Resources {
   public:
-	class Loader;
+	using Uri = ResourceMap::Uri;
+	using Sig = std::string_view;
 
-	Resources();
-	Resources(Resources&&) noexcept;
-	Resources& operator=(Resources&&) noexcept;
-	~Resources() noexcept;
+	Resources(Context const& context);
 
 	template <typename Type>
-	Ptr<Type> add(Signature sign, Type t) {
-		if (sign == Signature{}) { return {}; }
-		auto model = ktl::make_unique<Model<Type>>(std::move(t));
-		auto* ret = &model->t;
-		add_base(sign, std::move(model));
-		return ret;
+	Ptr<Type> load(Uri uri) {
+		if (auto ret = m_map.find<Type>(uri)) { return ret; }
+		return do_load<Type>(std::move(uri));
 	}
 
 	template <typename Type>
-	bool remove(Signature sign) {
-		return remove(sign, tg::TypeId::make<Type>());
+	Ptr<Type> load(Sig sig) {
+		return load<Type>(Uri{sig});
 	}
 
-	bool remove(Signature sign);
+	bool unload(Uri const& uri) { return m_map.remove(uri); }
 
 	template <typename Type>
-	Ptr<Type> find(Signature sign) const {
-		if (auto ret = find(sign); ret && ret->type == tg::TypeId::make<Type>()) { return &static_cast<Model<Type>*>(ret)->t; }
-		return {};
+	bool contains(Uri const& uri) const {
+		return m_map.contains<Type>(uri);
 	}
 
-	template <typename Type>
-	Ptr<Type> get(Signature sign) const {
-		auto ret = find<Type>(sign);
-		assert(ret);
-		return ret;
-	}
-
-	template <typename Type>
-	bool contains(Signature sign) const {
-		return find<Type>(sign) != nullptr;
-	}
-
-	bool contains(Signature sign) const { return find(sign) != nullptr; }
-
-	std::size_t size() const;
-	void clear();
+	std::size_t size() const { return m_map.size(); }
+	void clear() { m_map.clear(); }
 
   private:
-	struct Base {
-		tg::TypeId type{};
-		Base(tg::TypeId type) : type(type) {}
-		virtual ~Base() = default;
-	};
+	template <typename T>
+	using LoadUri = std::string;
 
 	template <typename T>
-	struct Model : Base {
-		T t;
-		Model(T&& t) : Base{tg::TypeId::make<T>()}, t{std::move(t)} {}
-	};
+	Ptr<T> do_load(Uri uri) = delete;
 
-	void add_base(Signature sign, ktl::kunique_ptr<Base>&& base);
-	Ptr<Base> find(Signature sign) const;
-	bool remove(Signature sign, tg::TypeId type);
-
-	struct Impl;
-	ktl::kunique_ptr<Impl> m_impl{};
+	ResourceMap m_map{};
+	Ptr<Context const> m_context{};
 };
+
+template <>
+Ptr<vf::Texture> Resources::do_load<vf::Texture>(Uri uri);
+
+template <>
+Ptr<vf::Ttf> Resources::do_load<vf::Ttf>(Uri uri);
+
+template <>
+Ptr<capo::Sound> Resources::do_load<capo::Sound>(Uri uri);
+
+template <>
+Ptr<vf::Sprite::Sheet> Resources::do_load<vf::Sprite::Sheet>(Uri uri);
 } // namespace pew

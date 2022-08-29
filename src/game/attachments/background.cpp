@@ -1,5 +1,4 @@
 #include <engine/frame.hpp>
-#include <engine/loader.hpp>
 #include <engine/resources.hpp>
 #include <game/attachments/background.hpp>
 #include <game/layers.hpp>
@@ -8,7 +7,7 @@
 
 namespace pew {
 namespace {
-auto const background_image = Signature{"textures/background.png"};
+constexpr auto texture_v = Resources::Sig{"textures/background.png"};
 }
 
 bool Background::set(vf::Texture const& texture) {
@@ -36,7 +35,7 @@ bool Background::set(vf::Texture const& texture) {
 void Background::setup() {
 	tg::RenderAttachment::setup();
 	layer = layers::background;
-	if (auto texture = tg::locate<Resources*>()->find<vf::Texture>(background_image)) { set(*texture); }
+	if (auto texture = tg::locate<Resources*>()->load<vf::Texture>(texture_v)) { set(*texture); }
 }
 
 void Background::tick(tg::DeltaTime dt) {

@@ -17,7 +17,7 @@ constexpr glm::vec2 accelerate(glm::vec2 current, glm::vec2 const target, float 
 	return current;
 }
 
-auto const fire_sfx = Signature{"sfx/weapon_fire.wav"};
+constexpr auto fire_sfx_v = Resources::Sig{"sfx/weapon_fire.wav"};
 } // namespace
 
 bool Weapon::fire(glm::vec2 const position, glm::vec2 const velocity, vf::Time ttl) {
@@ -26,7 +26,7 @@ bool Weapon::fire(glm::vec2 const position, glm::vec2 const velocity, vf::Time t
 		projectile.velocity.target = velocity;
 		projectile.ttl = ttl;
 		m_projectiles.add(position, projectile);
-		if (auto sound = tg::locate<Resources*>()->find<capo::Sound>(fire_sfx)) { tg::locate<Audio*>()->play(*sound); }
+		if (auto sound = tg::locate<Resources*>()->load<capo::Sound>(fire_sfx_v)) { tg::locate<Audio*>()->play(*sound); }
 		m_fire_wait = fire_delay;
 		return true;
 	}

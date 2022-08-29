@@ -14,11 +14,11 @@ struct ManifestLoader::Impl {
 	std::atomic<std::size_t> completed{};
 	std::vector<std::jthread> threads{};
 	std::size_t total{};
+	Ptr<Context const> context{};
 };
 
-ManifestLoader::ManifestLoader() : m_impl(ktl::make_unique<Impl>()), m_mutex(ktl::make_unique<std::mutex>()) {
-	m_resources = tg::locate<Resources*>();
-	m_context = tg::locate<Context*>();
+ManifestLoader::ManifestLoader(Context const& context, Resources& out_resources) : m_impl(ktl::make_unique<Impl>()), m_resources(&out_resources) {
+	m_impl->context = &context;
 }
 
 ManifestLoader::ManifestLoader(ManifestLoader&&) noexcept = default;
@@ -34,31 +34,14 @@ bool ManifestLoader::can_enqueue() const {
 	return true;
 }
 
-void ManifestLoader::enqueue(ktl::kfunction<void()> custom) {
-	if (!can_enqueue() || !custom) { return; }
-	do_enqueue([c = std::move(custom), m = m_mutex.get()] {
-		auto lock = std::scoped_lock{*m};
-		c();
-	});
-}
-
 void ManifestLoader::enqueue(Manifest manifest) {
-	enqueue(std::move(manifest.fonts));
-	enqueue(std::move(manifest.textures));
-	enqueue(std::move(manifest.sfx));
-	for (auto& sheet : manifest.sprite_sheets) {
-		enqueue([sheet = std::move(sheet), r = m_resources, c = m_context] {
-			auto info = Loader{*c}.load(LoadInfo<SheetInfo>{.uri = std::move(sheet.uri)});
-			if (!info) { return; }
-			// TODO: complete
+	// independent
+	enqueue<vf::Ttf>(std::move(manifest.fonts));
+	enqueue<vf::Texture>(std::move(manifest.textures));
+	enqueue<capo::Sound>(std::move(manifest.sfx));
 
-			if (auto texture = r->find<vf::Texture>(info.texture_uri)) {
-				auto sprite_sheet = vf::Sprite::Sheet{};
-				sprite_sheet.set_texture(texture->handle());
-				r->add(std::move(sheet.uri), std::move(sprite_sheet));
-			}
-		});
-	}
+	// dependent
+	enqueue<vf::Sprite::Sheet>(std::move(manifest.sheets));
 }
 
 std::size_t ManifestLoader::load(std::uint32_t threads) {
@@ -96,5 +79,5 @@ float ManifestLoader::progress() const {
 	return static_cast<float>(completed()) / static_cast<float>(total());
 }
 
-void ManifestLoader::do_enqueue(ktl::kfunction<void()>&& func) { m_impl->queue.push(std::move(func)); }
+void ManifestLoader::enqueue(ktl::kfunction<void()>&& func) { m_impl->queue.push(std::move(func)); }
 } // namespace pew

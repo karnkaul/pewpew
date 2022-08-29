@@ -1,7 +1,6 @@
 #include <engine/context.hpp>
 #include <engine/frame.hpp>
 #include <engine/manifest_loader.hpp>
-#include <engine/resources.hpp>
 #include <game/attachments/background.hpp>
 #include <game/attachments/player.hpp>
 #include <game/attachments/progress_bar.hpp>
@@ -267,25 +266,26 @@ class InitLoader : public tg::TickAttachment {
 		auto manifest = Manifest{};
 		if (auto count = Manifest::load(manifest, "manifest.txt"); count > 0) { logger::info("[Manifest] Loaded [{}] entries", count); }
 
-		m_loader.enqueue(std::move(manifest));
+		m_loader.emplace(*tg::locate<Context*>(), *tg::locate<Resources*>());
+		m_loader->enqueue(std::move(manifest));
 
-		auto const count = m_loader.load(1);
+		auto const count = m_loader->load(1);
 		logger::debug("Loading {} resources", count);
 
 		m_progress = entity()->attach<ProgressBar>();
 	}
 
 	void tick(tg::DeltaTime) override {
-		if (m_loader.idle()) {
+		if (m_loader->idle()) {
 			auto& world = tg::locate<tg::Director*>()->enqueue<World>();
 			world.spawn<Debug>();
 			return;
 		}
-		auto const current = m_loader.progress();
+		auto const current = m_loader->progress();
 		if (!vf::FloatEq{}(m_progress->progress, current)) { m_progress->progress = current; }
 	}
 
-	ManifestLoader m_loader{};
+	std::optional<ManifestLoader> m_loader{};
 	Ptr<ProgressBar> m_progress{};
 };
 
@@ -294,7 +294,7 @@ void run(Context context) {
 	tg::Services::provide(&context);
 	tg::Services::provide(&context.vf_context.device());
 	auto audio = tg::ServiceProvider<Audio>{*context.capo_instance};
-	auto resources = tg::ServiceProvider<Resources>{};
+	auto resources = tg::ServiceProvider<Resources>{context};
 
 	audio.set_sfx_gain(0.2f);
 	auto director = tg::Director::Service{};

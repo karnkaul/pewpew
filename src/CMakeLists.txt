@@ -5,12 +5,12 @@ target_sources(${PROJECT_NAME} PRIVATE
   engine/framerate.hpp
   engine/frame.hpp
   engine/instanced.hpp
-  engine/loader.cpp
-  engine/loader.hpp
   engine/manifest_loader.cpp
   engine/manifest_loader.hpp
   engine/manifest.cpp
   engine/manifest.hpp
+  engine/resource_map.cpp
+  engine/resource_map.hpp
   engine/resources.cpp
   engine/resources.hpp
 
@@ -46,8 +46,6 @@ target_sources(${PROJECT_NAME} PRIVATE
   util/property.hpp
   util/ptr.hpp
   util/random.hpp
-  util/signature.cpp
-  util/signature.hpp
   util/util.cpp
   util/util.hpp
 

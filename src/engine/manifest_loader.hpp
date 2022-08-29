@@ -3,13 +3,11 @@
 #include <engine/resources.hpp>
 #include <ktl/async/kfunction.hpp>
 #include <ktl/kunique_ptr.hpp>
-#include <tardigrade/services.hpp>
-#include <mutex>
 
 namespace pew {
 class ManifestLoader {
   public:
-	ManifestLoader();
+	ManifestLoader(Context const& context, Resources& out_resources);
 	ManifestLoader(ManifestLoader&&) noexcept;
 	ManifestLoader& operator=(ManifestLoader&&) noexcept;
 	~ManifestLoader() noexcept;
@@ -19,18 +17,12 @@ class ManifestLoader {
 	template <typename T>
 	void enqueue(LoadList<T> list) {
 		if (!can_enqueue()) { return; }
-		for (auto& info : list) {
-			if (info.uri.empty()) { continue; }
-			auto const func = [r = m_resources, c = m_context, m = m_mutex.get(), info = info] {
-				auto t = Loader{*c}.load(info);
-				auto lock = std::scoped_lock{*m};
-				r->add(Signature{info.uri}, std::move(t));
-			};
-			do_enqueue(func);
+		for (auto& uri : list) {
+			if (uri.empty()) { continue; }
+			enqueue([r = m_resources, u = std::move(uri)] { r->load<T>(u); });
 		}
 	}
 
-	void enqueue(ktl::kfunction<void()> custom);
 	void enqueue(Manifest manifest);
 
 	std::size_t load(std::uint32_t threads = 2);
@@ -42,12 +34,10 @@ class ManifestLoader {
 	float progress() const;
 
   private:
-	void do_enqueue(ktl::kfunction<void()>&& func);
+	void enqueue(ktl::kfunction<void()>&& func);
 
 	struct Impl;
 	ktl::kunique_ptr<Impl> m_impl{};
-	ktl::kunique_ptr<std::mutex> m_mutex{};
 	Ptr<Resources> m_resources{};
-	Ptr<Context> m_context{};
 };
 } // namespace pew

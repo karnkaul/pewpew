@@ -24,13 +24,13 @@ std::string format_elapsed(vf::Time elapsed) {
 	return str.str();
 }
 
-auto const main_font = Signature{"fonts/main.otf"};
+constexpr auto main_font_v = Resources::Sig{"fonts/main.otf"};
 } // namespace
 
 void Hud::setup() {
 	tg::RenderAttachment::setup();
 	auto const* device = tg::locate<vf::GfxDevice const*>();
-	auto const* resources = tg::locate<Resources*>();
+	auto* resources = tg::locate<Resources*>();
 	m_border = vf::Mesh{*device};
 	m_score = vf::Text{*device};
 	layer = layers::hud;
@@ -47,7 +47,7 @@ void Hud::setup() {
 	geometry.add_quad(qci);
 	m_border.buffer.write(std::move(geometry));
 
-	auto* ttf = resources->find<vf::Ttf>(main_font);
+	auto* ttf = resources->load<vf::Ttf>(main_font_v);
 	if (ttf) { m_score.set_ttf(ttf->handle()); }
 	auto const height = vf::Text::Height{40};
 	m_score.set_height(height);

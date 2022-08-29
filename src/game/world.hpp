@@ -3,7 +3,6 @@
 #include <ktl/kunique_ptr.hpp>
 #include <tardigrade/scene.hpp>
 #include <util/ptr.hpp>
-#include <util/signature.hpp>
 #include <concepts>
 #include <span>
 #include <vector>

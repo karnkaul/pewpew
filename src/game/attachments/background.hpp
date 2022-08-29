@@ -1,6 +1,5 @@
 #pragma once
 #include <tardigrade/render_attachment.hpp>
-#include <util/signature.hpp>
 #include <vulkify/graphics/primitives/mesh.hpp>
 #include <vulkify/graphics/texture.hpp>
 

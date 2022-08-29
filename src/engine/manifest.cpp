@@ -12,7 +12,7 @@ std::size_t Manifest::load(Manifest& out, char const* uri) {
 	if (!io::load(buffer, uri)) { return false; }
 
 	auto const push = [&ret](auto& out_list, std::string uri) {
-		out_list.push_back({.uri = std::move(uri)});
+		out_list.push_back(uri);
 		++ret;
 	};
 
@@ -24,7 +24,7 @@ std::size_t Manifest::load(Manifest& out, char const* uri) {
 		} else if (property.key.starts_with("textures/")) {
 			push(out.textures, std::move(property.key));
 		} else if (property.key.starts_with("sheets/")) {
-			push(out.sprite_sheets, std::move(property.key));
+			push(out.sheets, std::move(property.key));
 		} else if (property.key.starts_with("sfx/")) {
 			push(out.sfx, std::move(property.key));
 		} else {
