@@ -161,7 +161,7 @@ class Autopilot : public tg::TickAttachment {
 	Ptr<ObjectFactory> powerup_factory{};
 
   protected:
-	static constexpr float y_dir(glm::vec2 const player, glm::vec2 const damager, float const epsilon = 5.0f) {
+	static float y_dir(glm::vec2 const player, glm::vec2 const damager, float const epsilon = 5.0f) {
 		auto const dir = damager.y - player.y;
 		if (std::abs(dir) > epsilon) { return dir < 0.0f ? -1.0f : 1.0f; }
 		return 0.0f;
